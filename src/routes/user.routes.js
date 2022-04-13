@@ -23,24 +23,28 @@ userRoutes.post('/register', async (req, res) => {
 
 // login user
 userRoutes.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+    try{
+        const { email, password } = req.body;
    
-    const _user = await User.findOne({ where: {email : email}})
-    if(_user.active === true) {
-        if(_user){
-            const isMatch = await bcrypt.compare(password, _user.password)
-            if(isMatch){
-                const token = jwt.sign({ id: _user.id }, 'secret', { expiresIn: '1h' });
-                return res.json({ token, 
-                    user: {id: _user.id, name: _user.name, email: _user.email, role: _user.role} });
-            } else {
-                return res.status(401).json({ msg: 'Invalid password' })
+        const _user = await User.findOne({ where: {email : email}})
+        if(_user.active === true) {
+            if(_user){
+                const isMatch = await bcrypt.compare(password, _user.password)
+                if(isMatch){
+                    const token = jwt.sign({ id: _user.id }, 'secret', { expiresIn: '1h' });
+                    return res.json({ token, 
+                        user: {id: _user.id, name: _user.name, email: _user.email, role: _user.role} });
+                } else {
+                    return res.status(401).json({ msg: 'Invalid password' })
+                }
             }
+        } else {
+            return res.status(401).json({ msg: 'User is not active' })
         }
-    } else {
-        return res.status(401).json({ msg: 'User is not active' })
+    } catch {
+        return res.status(401).json({ msg: "Invalid Credentials" });
     }
-    return res.status(401).json({ msg: "Invalid Credentials" });
+    
 })
 
 //list all users
