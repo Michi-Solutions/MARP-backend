@@ -11,6 +11,5 @@ app.use(userRoutes)
 app.get('/', (req, res) => {
     return res.json({ message: 'Hello World' });
 })
-app.listen(8080, () => console.log("API is running on port 8080"));
 
 module.exports = app;
