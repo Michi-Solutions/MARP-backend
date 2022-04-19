@@ -3,6 +3,8 @@ const { User } = require('../../app/models');
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 
+const sendMail = require('../utils/sendMail');
+
 const userRoutes = express.Router();
 
 // register user
@@ -138,7 +140,9 @@ userRoutes.delete('/user/:id', async (req, res) => {
 
 userRoutes.post('/user/resetpassword', async (req, res) => {
     try {
-        const _user = await User.update({ resetPasswordToken: (Math.random() + 1).toString(36).substring(7) }, { where: { email: req.body.email } });
+        const token = (Math.random() + 1).toString(36).substring(7)
+        await User.update({ resetPasswordToken: token }, { where: { email: req.body.email } });
+        sendMail(token, req.body.email);
         return res.json({ msg: "Email Send" });
     } catch {
         return res.status(401).json({ msg: "Invalid email" });
