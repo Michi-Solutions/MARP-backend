@@ -48,10 +48,7 @@ describe('Authenticate Test', () => {
             .set('Authorization', `Token ${TOKEN}`)
 
         expect(res.status).toEqual(200);
-        expect(res.body).toHaveProperty('id');
-        expect(res.body).toHaveProperty('name');
-        expect(res.body).toHaveProperty('email');
-        expect(res.body).toHaveProperty('role');
+        expect(res.body).toHaveProperty('user');
     })
 
     it('Edit user test', async () => {
