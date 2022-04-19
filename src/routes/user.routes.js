@@ -76,11 +76,11 @@ userRoutes.get('/user/:id', async (req, res) => {
         const _user = await User.findOne({ where: { id: decoded.id } });
 
         if(_user.role.split(",").includes("admin")){
-            const user = await User.findOne({ where: { id: req.params.id } });
-            return res.status(200).json({ user: {id: _user.id, name: _user.name, email: _user.email, role: _user.role} });
+            const searchUser = await User.findOne({ where: { id: req.params.id } });
+            return res.status(200).json({ user: {id: searchUser.id, name: searchUser.name, email: searchUser.email, role: searchUser.role} });
         } else if (decoded.id == req.params.id) {
-            const user = await User.findOne({ where: { id: req.params.id } });
-            return res.status(200).json({ user: {id: _user.id, name: _user.name, email: _user.email, role: _user.role} });
+            const searchUser = await User.findOne({ where: { id: req.params.id } });
+            return res.status(200).json({ user: {id: searchUser.id, name: searchUser.name, email: searchUser.email, role: searchUser.role} });
         } else {
             return res.status(401).json({ msg: "You are not authorized to view this page" });
         }
