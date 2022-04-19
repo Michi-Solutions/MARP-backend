@@ -9,7 +9,7 @@ const userRoutes = express.Router();
 
 // register user
 userRoutes.post('/register', async (req, res) => {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
     const salt = await bcrypt.genSalt(10);
     const encrypt_password = await bcrypt.hash(password, salt)
@@ -43,6 +43,7 @@ userRoutes.post('/login', async (req, res) => {
         } else {
             return res.status(401).json({ msg: 'User is not active' })
         }
+
     } catch {
         return res.status(401).json({ msg: "Invalid Credentials" });
     }
@@ -86,6 +87,7 @@ userRoutes.get('/user/:id', async (req, res) => {
         }
 
     } catch {
+
         return res.status(401).json({msg: "Access Denied"});
     }
 })
@@ -109,6 +111,7 @@ userRoutes.put('/user/:id', async (req, res) => {
         } else {
             return res.status(401).json({ msg: "You are not authorized to view this page" });
         }
+
     } catch {
         return res.status(401).json({ msg: "Access Denied" });
     }
@@ -133,22 +136,26 @@ userRoutes.delete('/user/:id', async (req, res) => {
         } else {
             return res.status(401).json({ msg: "You are not authorized to view this page" });
         }
+
     } catch {
         return res.status(401).json({ msg: "Access Denied" });
     }
 })
 
+// reset password and generete token
 userRoutes.post('/user/resetpassword', async (req, res) => {
     try {
         const token = (Math.random() + 1).toString(36).substring(7)
         await User.update({ resetPasswordToken: token }, { where: { email: req.body.email } });
         sendMail(token, req.body.email);
         return res.json({ msg: "Email Send" });
+
     } catch {
         return res.status(401).json({ msg: "Invalid email" });
     }
 })
 
+// change password with token
 userRoutes.put('/user/resetpassword/:resetPasswordToken', async (req, res) => {
     try {
         const _user = await User.findOne({ where: { resetPasswordToken: req.params.resetPasswordToken } });
@@ -160,6 +167,7 @@ userRoutes.put('/user/resetpassword/:resetPasswordToken', async (req, res) => {
         } else {
             return res.status(401).json({ msg: "Invalid token" });
         }
+
     } catch {
         return res.status(401).json({ msg: "Invalid token" });
     }
