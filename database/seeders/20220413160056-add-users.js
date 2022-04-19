@@ -15,12 +15,16 @@ module.exports = {
         email: 'admin@gmail.com',
         password: await encrypt_password('pizza123'),
         role: 'user,admin',
+        createdAt: new Date(),
+        updatedAt: new Date()
       },
       {
         name: 'user',
         email: 'user@gmail.com',
         password: await encrypt_password('pizza123'),
         role: 'user',
+        createdAt: new Date(),
+        updatedAt: new Date()
       }
     ], {}),
 
