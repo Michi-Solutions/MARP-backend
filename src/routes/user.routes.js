@@ -48,7 +48,7 @@ userRoutes.post('/login', async (req, res) => {
 })
 
 //list all users
-userRoutes.get('/userlist', async (req, res) => {
+userRoutes.get('/user/list', async (req, res) => {
     try {
         const token = req.headers.authorization.split(" ")[1];
         let decoded = jwt.verify(token, 'secret');
@@ -75,10 +75,10 @@ userRoutes.get('/user/:id', async (req, res) => {
 
         if(_user.role.split(",").includes("admin")){
             const user = await User.findOne({ where: { id: req.params.id } });
-            return res.status(200).json(user);
+            return res.status(200).json({ user: {id: _user.id, name: _user.name, email: _user.email, role: _user.role} });
         } else if (decoded.id == req.params.id) {
             const user = await User.findOne({ where: { id: req.params.id } });
-            return res.status(200).json(user);
+            return res.status(200).json({ user: {id: _user.id, name: _user.name, email: _user.email, role: _user.role} });
         } else {
             return res.status(401).json({ msg: "You are not authorized to view this page" });
         }
@@ -133,6 +133,31 @@ userRoutes.delete('/user/:id', async (req, res) => {
         }
     } catch {
         return res.status(401).json({ msg: "Access Denied" });
+    }
+})
+
+userRoutes.post('/user/resetpassword', async (req, res) => {
+    try {
+        const _user = await User.update({ resetPasswordToken: (Math.random() + 1).toString(36).substring(7) }, { where: { email: req.body.email } });
+        return res.json({ msg: "Email Send" });
+    } catch {
+        return res.status(401).json({ msg: "Invalid email" });
+    }
+})
+
+userRoutes.put('/user/resetpassword/:resetPasswordToken', async (req, res) => {
+    try {
+        const _user = await User.findOne({ where: { resetPasswordToken: req.params.resetPasswordToken } });
+        if(_user){
+            const salt = await bcrypt.genSalt(10);
+            const encrypt_password = await bcrypt.hash(req.body.password, salt)
+            await User.update({ password: encrypt_password, resetPasswordToken: null }, { where: { resetPasswordToken: req.params.resetPasswordToken } });
+            return res.json({ msg: "Password Changed Successfully" });
+        } else {
+            return res.status(401).json({ msg: "Invalid token" });
+        }
+    } catch {
+        return res.status(401).json({ msg: "Invalid token" });
     }
 })
 
