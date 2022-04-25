@@ -166,8 +166,8 @@ userRoutes.delete('/user/:id', async (req, res) => {
 userRoutes.post('/user/resetpassword', async (req, res) => {
     try {
         const token = (Math.random() + 1).toString(36).substring(7)
-        await User.update({ resetPasswordToken: token }, { where: { email: req.body.email } });
-        sendMail(token, req.body.email);
+        await User.update({ resetPasswordToken: token }, { where: { mail: req.body.mail } });
+        sendMail(token, req.body.mail);
         return res.json({ msg: "Email Send" });
 
     } catch {
@@ -181,8 +181,8 @@ userRoutes.put('/user/resetpassword/:resetPasswordToken', async (req, res) => {
         const _user = await User.findOne({ where: { resetPasswordToken: req.params.resetPasswordToken } });
         if(_user){
             const salt = await bcrypt.genSalt(10);
-            const encrypt_password = await bcrypt.hash(req.body.password, salt)
-            await User.update({ password: encrypt_password, resetPasswordToken: null }, { where: { resetPasswordToken: req.params.resetPasswordToken } });
+            const encrypt_password = await bcrypt.hash(req.body.senha, salt)
+            await User.update({ senha: encrypt_password, resetPasswordToken: null }, { where: { resetPasswordToken: req.params.resetPasswordToken } });
             return res.json({ msg: "Password Changed Successfully" });
         } else {
             return res.status(401).json({ msg: "Invalid token" });
