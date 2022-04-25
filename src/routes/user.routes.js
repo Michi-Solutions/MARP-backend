@@ -71,23 +71,21 @@ userRoutes.post('/login', async (req, res) => {
 
 //list all users
 userRoutes.get('/user/list', async (req, res) => {
-    const users = await User.findAll();
-    return res.status(200).json(users);
-    // try {
-    //     const token = req.headers.authorization.split(" ")[1];
-    //     let decoded = jwt.verify(token, 'secret');
-    //     const _user = await User.findOne({ where: { id: decoded.id } });
+    
+    try {
+        const token = req.headers.authorization.split(" ")[1]
+        let decoded = jwt.verify(token, 'secret');
 
-    //     if(_user.role.split(",").includes("admin")){
-    //         const users = await User.findAll();
-    //         return res.status(200).json(users);
-    //     } else {
-    //         return res.status(401).json({ msg: "You are not authorized to view this page" });
-    //     }
+        const _user = await User.findOne({ where: { id_usuario: decoded.id } });
 
-    // } catch {
-    //     return res.status(401).json({msg: "Access Denied"});
-    // }
+        if(_user.perfil === "admin"){
+            const users = await User.findAll();
+            return res.status(200).json(users);
+        }
+        return res.status(401).json({ msg: "You don't have permission to access this resource" });
+    } catch {
+        return res.status(401).json({msg: "Access Denied"});
+    }
 })
 
 //list user
