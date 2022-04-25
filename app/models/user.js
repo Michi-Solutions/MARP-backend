@@ -30,6 +30,9 @@ module.exports = (sequelize, DataTypes) => {
         perfil: {
             type: DataTypes.STRING(45),
         },
+        resetPasswordToken: {
+            type: DataTypes.STRING(45),
+        }
     }, {
         tableName: 'tbl_usuario',
         timestamps: false 
