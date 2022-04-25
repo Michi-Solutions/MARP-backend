@@ -9,16 +9,35 @@ const userRoutes = express.Router();
 
 // register user
 userRoutes.post('/register', async (req, res) => {
-    const { name, email, password } = req.body;
+    const { nome, sobrenome, mail, senha, professor } = req.body;
 
     const salt = await bcrypt.genSalt(10);
-    const encrypt_password = await bcrypt.hash(password, salt)
-    await User.create({ 
-        name: name,
-        email: email,
-        password: encrypt_password, 
-        role: "user"
-    });
+    const encrypt_password = await bcrypt.hash(senha, salt)
+
+    if (professor) {
+        await User.create({
+            nome: nome,
+            sobrenome: sobrenome,
+            mail: mail,
+            senha: encrypt_password,
+            inativo: false,
+            data_cadastro: new Date(),
+            data_exclusao: null,
+            perfil: 'professor',
+          });
+    } else {
+        await User.create({
+            nome: nome,
+            sobrenome: sobrenome,
+            mail: mail,
+            senha: encrypt_password,
+            inativo: false,
+            data_cadastro: new Date(),
+            data_exclusao: null,
+            perfil: 'student',
+          });
+    }
+    
 
     return res.status(201).json({msg: "User Created Successfully"});
 })
@@ -26,16 +45,16 @@ userRoutes.post('/register', async (req, res) => {
 // login user
 userRoutes.post('/login', async (req, res) => {
     try{
-        const { email, password } = req.body;
+        const { mail, senha } = req.body;
    
-        const _user = await User.findOne({ where: {email : email}})
-        if(_user.active === true) {
+        const _user = await User.findOne({ where: {mail : mail}})
+        if(_user.inativo === false) {
             if(_user){
-                const isMatch = await bcrypt.compare(password, _user.password)
+                const isMatch = await bcrypt.compare(senha, _user.senha)
                 if(isMatch){
-                    const token = jwt.sign({ id: _user.id }, 'secret', { expiresIn: '1h' });
+                    const token = jwt.sign({ id: _user.id_usuario }, 'secret', { expiresIn: '1h' });
                     return res.json({ token, 
-                        user: {id: _user.id, name: _user.name, email: _user.email, role: _user.role} });
+                        usuario: {id: _user.id_usuario, nome: _user.nome, sobrenome: _user.sobrenome, mail: _user.mail, perfil: _user.perfil} });
                 } else {
                     return res.status(401).json({ msg: 'Invalid password' })
                 }
@@ -52,21 +71,23 @@ userRoutes.post('/login', async (req, res) => {
 
 //list all users
 userRoutes.get('/user/list', async (req, res) => {
-    try {
-        const token = req.headers.authorization.split(" ")[1];
-        let decoded = jwt.verify(token, 'secret');
-        const _user = await User.findOne({ where: { id: decoded.id } });
+    const users = await User.findAll();
+    return res.status(200).json(users);
+    // try {
+    //     const token = req.headers.authorization.split(" ")[1];
+    //     let decoded = jwt.verify(token, 'secret');
+    //     const _user = await User.findOne({ where: { id: decoded.id } });
 
-        if(_user.role.split(",").includes("admin")){
-            const users = await User.findAll();
-            return res.status(200).json(users);
-        } else {
-            return res.status(401).json({ msg: "You are not authorized to view this page" });
-        }
+    //     if(_user.role.split(",").includes("admin")){
+    //         const users = await User.findAll();
+    //         return res.status(200).json(users);
+    //     } else {
+    //         return res.status(401).json({ msg: "You are not authorized to view this page" });
+    //     }
 
-    } catch {
-        return res.status(401).json({msg: "Access Denied"});
-    }
+    // } catch {
+    //     return res.status(401).json({msg: "Access Denied"});
+    // }
 })
 
 //list user
@@ -74,14 +95,14 @@ userRoutes.get('/user/:id', async (req, res) => {
     try {
         const token = req.headers.authorization.split(" ")[1];
         let decoded = jwt.verify(token, 'secret');
-        const _user = await User.findOne({ where: { id: decoded.id } });
+        const _user = await User.findOne({ where: { id_usuario: decoded.id } });
 
-        if(_user.role.split(",").includes("admin")){
-            const searchUser = await User.findOne({ where: { id: req.params.id } });
-            return res.status(200).json({ user: {id: searchUser.id, name: searchUser.name, email: searchUser.email, role: searchUser.role} });
+        if(_user.perfil === "admin"){
+            const _user = await User.findOne({ where: { id_usuario: req.params.id } });
+            return res.status(200).json({ usuario: {id: _user.id_usuario, nome: _user.nome, sobrenome: _user.sobrenome, mail: _user.mail, perfil: _user.perfil} });
+
         } else if (decoded.id == req.params.id) {
-            const searchUser = await User.findOne({ where: { id: req.params.id } });
-            return res.status(200).json({ user: {id: searchUser.id, name: searchUser.name, email: searchUser.email, role: searchUser.role} });
+            return res.status(200).json({ usuario: {id: _user.id_usuario, nome: _user.nome, sobrenome: _user.sobrenome, mail: _user.mail, perfil: _user.perfil} });
         } else {
             return res.status(401).json({ msg: "You are not authorized to view this page" });
         }
@@ -95,18 +116,19 @@ userRoutes.get('/user/:id', async (req, res) => {
 //update user
 userRoutes.put('/user/:id', async (req, res) => {
     try {
+        const { nome, sobrenome } = req.body;
         const token = req.headers.authorization.split(" ")[1]
         let decoded = jwt.verify(token, 'secret');
-        const { id } = req.params;
-        const _user = await User.findOne({ where: { id: decoded.id } });
 
-        if (_user.role.split(",").includes("admin")) {
-            await User.update({ name: req.body.name }, { where: { id } });
-            return res.json({ msg: "User Updated Successfully" });
+        const _user = await User.findOne({ where: { id_usuario: decoded.id } });
 
-        } else if(decoded.id == id){
-            await User.update({ name: req.body.name }, { where: { id } });
-            return res.json({ msg: "User Updated Successfully" });
+        if (_user.perfil === "admin") {
+            await User.update({ nome: nome, sobrenome: sobrenome  }, { where: { id_usuario: req.params.id } });
+            return res.status(200).json({ msg: "User Updated Successfully" });
+
+        } else if(decoded.id == req.params.id){
+            await User.update({ nome: nome, sobrenome: sobrenome  }, { where: { id_usuario: decoded.id } });
+            return res.status(200).json({ msg: "User Updated Successfully" });
 
         } else {
             return res.status(401).json({ msg: "You are not authorized to view this page" });
@@ -122,16 +144,16 @@ userRoutes.delete('/user/:id', async (req, res) => {
     try {
         const token = req.headers.authorization.split(" ")[1]
         let decoded = jwt.verify(token, 'secret');
-        const { id } = req.params;
-        const _user = await User.findOne({ where: { id: decoded.id } });
 
-        if (_user.role.split(",").includes("admin")) {
-            await User.update({ name: false }, { where: { id } });
-            return res.json({ msg: "User Deleted Successfully" });
+        const _user = await User.findOne({ where: { id_usuario: decoded.id } });
 
-        } else if(decoded.id == id){
-            await User.update({ active: false }, { where: { id } });
-            return res.json({ msg: "User Deleted Successfully" });
+        if (_user.perfil === "admin") {
+            await User.update({ inativo: true, data_exclusao: new Date()  }, { where: { id_usuario: req.params.id } });
+            return res.status(200).json({ msg: "User Deleted Successfully" });
+
+        } else if(decoded.id == req.params.id){
+            await User.update({ inativo: true, data_exclusao: new Date()  }, { where: { id_usuario: decoded.id } });
+            return res.status(200).json({ msg: "User Deleted Successfully" });
 
         } else {
             return res.status(401).json({ msg: "You are not authorized to view this page" });
@@ -171,6 +193,11 @@ userRoutes.put('/user/resetpassword/:resetPasswordToken', async (req, res) => {
     } catch {
         return res.status(401).json({ msg: "Invalid token" });
     }
+})
+
+
+userRoutes.post('/user/professor', async (req, res) => {
+
 })
 
 module.exports = userRoutes;

@@ -8,25 +8,39 @@ async function encrypt_password(password) {
 
 
 module.exports = {
-  up: async (queryInterface, Sequelize) => queryInterface.bulkInsert('Users', 
+  up: async (queryInterface, Sequelize) => queryInterface.bulkInsert('tbl_usuario', 
     [
       {
-        name: 'admin',
-        email: 'admin@gmail.com',
-        password: await encrypt_password('pizza123'),
-        role: 'user,admin',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        nome: 'admin',
+        sobrenome: '',
+        mail: 'admin@gmail.com',
+        senha: await encrypt_password('pizza123'),
+        inativo: false,
+        data_cadastro: new Date(),
+        data_exclusao: null,
+        perfil: 'admin',
       },
       {
-        name: 'user',
-        email: 'user@gmail.com',
-        password: await encrypt_password('pizza123'),
-        role: 'user',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
+        nome: 'student',
+        sobrenome: '',
+        mail: 'student@gmail.com',
+        senha: await encrypt_password('pizza123'),
+        inativo: false,
+        data_cadastro: new Date(),
+        data_exclusao: null,
+        perfil: 'student',
+      },
+      {
+        nome: 'professor',
+        sobrenome: '',
+        mail: 'professor@gmail.com',
+        senha: await encrypt_password('pizza123'),
+        inativo: false,
+        data_cadastro: new Date(),
+        data_exclusao: null,
+        perfil: 'professor',
+      },
     ], {}),
 
-  down: (queryInterface) => queryInterface.bulkDelete('Users', null, {}),
+  down: (queryInterface) => queryInterface.bulkDelete('tbl_usuario', null, {}),
 };
