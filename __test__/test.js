@@ -20,9 +20,10 @@ describe('Authenticate Test', () => {
         const res = await request(app)
             .post('/register')
             .send({
-                name: 'test',
-                email: `test${RANDOM}@gmail.com`,
-                password: 'pizza123'
+                nome: 'test',
+                sobrenome: `${RANDOM}`,
+                mail: `test${RANDOM}@gmail.com`,
+                senha: 'pizza123'
             })
         
         expect(res.status).toEqual(201);
@@ -32,14 +33,14 @@ describe('Authenticate Test', () => {
         const res = await request(app)
             .post('/login')
             .send({
-                email: `test${RANDOM}@gmail.com`,
-                password: 'pizza123'
+                mail: `test${RANDOM}@gmail.com`,
+                senha: 'pizza123'
             })
 
         expect(res.status).toEqual(200);
         expect(res.body).toHaveProperty('token');
         TOKEN = res.body.token
-        id = res.body.user.id
+        id = res.body.usuario.id
     })
 
     it('View user test', async () => {
@@ -48,7 +49,6 @@ describe('Authenticate Test', () => {
             .set('Authorization', `Token ${TOKEN}`)
 
         expect(res.status).toEqual(200);
-        expect(res.body).toHaveProperty('user');
     })
 
     it('Edit user test', async () => {
@@ -56,7 +56,7 @@ describe('Authenticate Test', () => {
             .put(`/user/${id}`)
             .set('Authorization', `Token ${TOKEN}`)
             .send({
-                name: `testUpdate`,
+                nome: `testUpdate`,
             })
         
         expect(res.status).toEqual(200);
