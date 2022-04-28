@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-    const User = sequelize.define('User', {
-        id_usuario: {
+    const areaConhecimento = sequelize.define('areaConhecimento', {
+        id_area_conhecimento: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true
@@ -8,42 +8,38 @@ module.exports = (sequelize, DataTypes) => {
         nome: {
             type: DataTypes.STRING(45),
         },
-        sobrenome: {
-            type: DataTypes.STRING(45),
+        nome_curto: {
+            type: DataTypes.STRING(15),
         },
-        mail: {
-            type: DataTypes.STRING(100),
-            unique: true
+        descricao: {
+            type: DataTypes.STRING(400),
         },
-        senha: {
-            type: DataTypes.STRING(255),
+        imagem: {
+            type: DataTypes.BLOB,
         },
         ativo: {
             type: DataTypes.BOOLEAN,
         },
-        data_cadastro: {
+        data_criacao: {
             type: DataTypes.DATE
         },
         data_exclusao: {
             type: DataTypes.DATE
         },
-        perfil: {
-            type: DataTypes.STRING(45),
+        id_professor: {
+            type: DataTypes.INTEGER,
         },
-        resetPasswordToken: {
-            type: DataTypes.STRING(45),
-        },
-        turmas_area_conhecimento: {
+        tokens_entrada: {
             type: DataTypes.JSON,
             defaultValue: {
-                id_turmas: [null]
+                tokens: [null]
             }
         }
     }, {
-        tableName: 'tbl_usuario',
+        tableName: 'tbl_area_conhecimento',
         timestamps: false 
     });
 
     
-    return User;
+    return areaConhecimento;
 }

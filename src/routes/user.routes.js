@@ -20,7 +20,7 @@ userRoutes.post('/register', async (req, res) => {
             sobrenome: sobrenome,
             mail: mail,
             senha: encrypt_password,
-            inativo: false,
+            ativo: true,
             data_cadastro: new Date(),
             data_exclusao: null,
             perfil: 'professor',
@@ -31,7 +31,7 @@ userRoutes.post('/register', async (req, res) => {
             sobrenome: sobrenome,
             mail: mail,
             senha: encrypt_password,
-            inativo: false,
+            ativo: true,
             data_cadastro: new Date(),
             data_exclusao: null,
             perfil: 'student',
@@ -44,11 +44,11 @@ userRoutes.post('/register', async (req, res) => {
 
 // login user
 userRoutes.post('/login', async (req, res) => {
-    try{
+    // try{
         const { mail, senha } = req.body;
    
         const _user = await User.findOne({ where: {mail : mail}})
-        if(_user.inativo === false) {
+        if(_user.ativo === true) {
             if(_user){
                 const isMatch = await bcrypt.compare(senha, _user.senha)
                 if(isMatch){
@@ -63,29 +63,30 @@ userRoutes.post('/login', async (req, res) => {
             return res.status(401).json({ msg: 'User is not active' })
         }
 
-    } catch {
-        return res.status(401).json({ msg: "Invalid Credentials" });
-    }
+    // } catch {
+    //     return res.status(401).json({ msg: "Invalid Credentials" });
+    // }
     
 })
 
 //list all users
 userRoutes.get('/user/list', async (req, res) => {
-    
-    try {
-        const token = req.headers.authorization.split(" ")[1]
-        let decoded = jwt.verify(token, 'secret');
+    const users = await User.findAll();
+    return res.status(200).json(users);
+    // try {
+    //     const token = req.headers.authorization.split(" ")[1]
+    //     let decoded = jwt.verify(token, 'secret');
 
-        const _user = await User.findOne({ where: { id_usuario: decoded.id } });
+    //     const _user = await User.findOne({ where: { id_usuario: decoded.id } });
 
-        if(_user.perfil === "admin"){
-            const users = await User.findAll();
-            return res.status(200).json(users);
-        }
-        return res.status(401).json({ msg: "You don't have permission to access this resource" });
-    } catch {
-        return res.status(401).json({msg: "Access Denied"});
-    }
+    //     if(_user.perfil === "admin"){
+    //         const users = await User.findAll();
+    //         return res.status(200).json(users);
+    //     }
+    //     return res.status(401).json({ msg: "You don't have permission to access this resource" });
+    // } catch {
+    //     return res.status(401).json({msg: "Access Denied"});
+    // }
 })
 
 //list user
@@ -146,11 +147,11 @@ userRoutes.delete('/user/:id', async (req, res) => {
         const _user = await User.findOne({ where: { id_usuario: decoded.id } });
 
         if (_user.perfil === "admin") {
-            await User.update({ inativo: true, data_exclusao: new Date()  }, { where: { id_usuario: req.params.id } });
+            await User.update({ ativo: false, data_exclusao: new Date()  }, { where: { id_usuario: req.params.id } });
             return res.status(200).json({ msg: "User Deleted Successfully" });
 
         } else if(decoded.id == req.params.id){
-            await User.update({ inativo: true, data_exclusao: new Date()  }, { where: { id_usuario: decoded.id } });
+            await User.update({ ativo: false, data_exclusao: new Date()  }, { where: { id_usuario: decoded.id } });
             return res.status(200).json({ msg: "User Deleted Successfully" });
 
         } else {
@@ -167,7 +168,12 @@ userRoutes.post('/user/resetpassword', async (req, res) => {
     try {
         const token = (Math.random() + 1).toString(36).substring(7)
         await User.update({ resetPasswordToken: token }, { where: { mail: req.body.mail } });
-        sendMail(token, req.body.mail);
+        sendMail(token, 
+            req.body.mails, 
+            '/user/resetpassword', 
+            "Reset Password", 
+            "Clique para resetar sua senha: ", 
+            "Resetar senha")
         return res.json({ msg: "Email Send" });
 
     } catch {
@@ -191,11 +197,6 @@ userRoutes.put('/user/resetpassword/:resetPasswordToken', async (req, res) => {
     } catch {
         return res.status(401).json({ msg: "Invalid token" });
     }
-})
-
-
-userRoutes.post('/user/professor', async (req, res) => {
-
 })
 
 module.exports = userRoutes;
