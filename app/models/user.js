@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
         senha: {
             type: DataTypes.STRING(255),
         },
-        inativo: {
+        ativo: {
             type: DataTypes.BOOLEAN,
         },
         data_cadastro: {
@@ -32,6 +32,12 @@ module.exports = (sequelize, DataTypes) => {
         },
         resetPasswordToken: {
             type: DataTypes.STRING(45),
+        },
+        turmas_area_conhecimento: {
+            type: DataTypes.JSON,
+            defaultValue: {
+                id_turmas: [null]
+            }
         }
     }, {
         tableName: 'tbl_usuario',
