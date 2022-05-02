@@ -7,12 +7,13 @@ const sendMail = require('../utils/sendMail');
 
 const areaConhecimentoRoutes = express.Router();
 
+// list all areasConhecimento
 areaConhecimentoRoutes.get('/areaConhecimento', async (req, res) => {
     const areasConhecimento = await areaConhecimento.findAll();
     return res.json(areasConhecimento);
 })
 
-//create
+//create areaConhecimento
 areaConhecimentoRoutes.post('/areaConhecimento', async (req, res) => {
     try {
         const token = req.headers.authorization.split(" ")[1]
@@ -39,6 +40,7 @@ areaConhecimentoRoutes.post('/areaConhecimento', async (req, res) => {
 })
     
 
+// list all areaConhecimento by professor
 areaConhecimentoRoutes.get('/areaConhecimento/mylist', async (req, res) => {
     try{
         const token = req.headers.authorization.split(" ")[1]
@@ -54,6 +56,7 @@ areaConhecimentoRoutes.get('/areaConhecimento/mylist', async (req, res) => {
     }
 })
 
+// Create a invite to a user
 areaConhecimentoRoutes.post('/areaConhecimento/generatetokens/:id', async (req, res) => {
     try {
         const token = req.headers.authorization.split(" ")[1]
@@ -82,6 +85,7 @@ areaConhecimentoRoutes.post('/areaConhecimento/generatetokens/:id', async (req, 
     }
 })
 
+// Add user to areaConhecimento
 areaConhecimentoRoutes.post('/areaConhecimento/join/:token', async (req, res) => {
     try {
         const token = req.headers.authorization.split(" ")[1]
