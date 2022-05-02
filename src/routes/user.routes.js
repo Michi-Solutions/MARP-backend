@@ -169,8 +169,8 @@ userRoutes.post('/user/resetpassword', async (req, res) => {
         const token = (Math.random() + 1).toString(36).substring(7)
         await User.update({ resetPasswordToken: token }, { where: { mail: req.body.mail } });
         sendMail(token, 
-            req.body.mails, 
-            '/user/resetpassword', 
+            req.body.mail, 
+            '/users/resetpasswordtoken', 
             "Reset Password", 
             "Clique para resetar sua senha: ", 
             "Resetar senha")
