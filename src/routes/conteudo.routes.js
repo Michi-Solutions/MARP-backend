@@ -29,32 +29,32 @@ conteudoRoutes.get('/conteudo', async (req, res) => {
 })
 
 conteudoRoutes.post('/conteudo', async (req, res) => {
-    const bodyConteudo = { titulo, texto, tipo, id_area_conhecimento } = req.body
+    const conteudo = { titulo, texto, tipo, id_area_conhecimento } = req.body
 
-    const bodyRegra = { qtd_insercao, data_inicial, data_final } = req.body
+    const regra = { qtd_insercao, data_inicial, data_final } = req.body
 
     console.log(req.files.arquivo)
 
     const _regra = await Regra.create({
-        nome: bodyRegra.nome,
-        qtd_insercao_dia: bodyRegra.qtd_insercao,
-        data_inicial: Date.parse(bodyRegra.data_inicial),
-        data_final: Date.parse(bodyRegra.data_final),
+        nome: regra.nome,
+        qtd_insercao_dia: regra.qtd_insercao,
+        data_inicial: Date.parse(regra.data_inicial),
+        data_final: Date.parse(regra.data_final),
         ativa: true,
         data_cadastro: new Date(),
         data_exclusao: null
     })
 
     const _conteudo = await Conteudo.create({
-        titulo: bodyConteudo.titulo,
-        texto: bodyConteudo.texto,
-        tipo: bodyConteudo.tipo,
+        titulo: conteudo.titulo,
+        texto: conteudo.texto,
+        tipo: conteudo.tipo,
         data_criacao: new Date(),
         data_exclusao: null,
         duracao: null,
         arquivo: req.files.arquivo,
-        id_area_conhecimento: bodyConteudo.id_area_conhecimento,
-        id_regra: _regra.id_regra_conteudo,
+        id_area_conhecimento: conteudo.id_area_conhecimento,
+        id_regra: _regra.id_regra,
     });
 
     return res.status(201).json({ msg: "Conteudo created successfully" });
