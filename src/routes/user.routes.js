@@ -44,7 +44,7 @@ userRoutes.post('/register', async (req, res) => {
 
 // login user
 userRoutes.post('/login', async (req, res) => {
-    // try{
+    try{
         const { mail, senha } = req.body;
    
         const _user = await User.findOne({ where: {mail : mail}})
@@ -63,30 +63,28 @@ userRoutes.post('/login', async (req, res) => {
             return res.status(401).json({ msg: 'User is not active' })
         }
 
-    // } catch {
-    //     return res.status(401).json({ msg: "Invalid Credentials" });
-    // }
+    } catch {
+        return res.status(401).json({ msg: "Invalid Credentials" });
+    }
     
 })
 
 //list all users
 userRoutes.get('/user/list', async (req, res) => {
-    const users = await User.findAll();
-    return res.status(200).json(users);
-    // try {
-    //     const token = req.headers.authorization.split(" ")[1]
-    //     let decoded = jwt.verify(token, 'secret');
+    try {
+        const token = req.headers.authorization.split(" ")[1]
+        let decoded = jwt.verify(token, 'secret');
 
-    //     const _user = await User.findOne({ where: { id_usuario: decoded.id } });
+        const _user = await User.findOne({ where: { id_usuario: decoded.id } });
 
-    //     if(_user.perfil === "admin"){
-    //         const users = await User.findAll();
-    //         return res.status(200).json(users);
-    //     }
-    //     return res.status(401).json({ msg: "You don't have permission to access this resource" });
-    // } catch {
-    //     return res.status(401).json({msg: "Access Denied"});
-    // }
+        if(_user.perfil === "admin"){
+            const users = await User.findAll();
+            return res.status(200).json(users);
+        }
+        return res.status(401).json({ msg: "You don't have permission to access this resource" });
+    } catch {
+        return res.status(401).json({msg: "Access Denied"});
+    }
 })
 
 //list user
