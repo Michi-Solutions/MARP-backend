@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
     const Regra = sequelize.define('Regra', {
-        id_regra_conteudo: {
+        id_regra: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true
