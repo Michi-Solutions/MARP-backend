@@ -12,18 +12,23 @@ const quizRoutes = express.Router();
 
 // list all areasConhecimento
 quizRoutes.get('/quiz/:id', async (req, res) => {
+    try{
+        const token = req.headers.authorization.split(" ")[1];
+        let decoded = jwt.verify(token, 'secret');
 
-    const token = req.headers.authorization.split(" ")[1];
-    let decoded = jwt.verify(token, 'secret');
 
+        const _quiz = await Quiz.findOne({ where: { id_quiz: req.params.id } });
+        const _conteudo = await Conteudo.findOne({ where: { id_conteudo: _quiz.dataValues.id_conteudo } })
+        const _turma = await Turma.findOne({ where: { id_usuario: decoded.id, id_area_conhecimento: _conteudo.dataValues.id_area_conhecimento  } })
+        const _questao = await Questao.findAll({ where: { id_quiz: req.params.id } });
 
-    const _quiz = await Quiz.findOne({ where: { id_quiz: req.params.id } });
-    const _conteudo = await Conteudo.findOne({ where: { id_conteudo: _quiz.dataValues.id_conteudo } })
-    const _turma = await Turma.findOne({ where: { id_usuario: decoded.id, id_area_conhecimento: _conteudo.dataValues.id_area_conhecimento  } })
-    const _questao = await Questao.findAll({ where: { id_quiz: req.params.id } });
-
-    if (_turma != null) {
-        return res.json({quiz: _quiz, questoes: _questao});
+        if (_turma != null) {
+            return res.json({quiz: _quiz, questoes: _questao});
+        } else {
+            return res.status(401).json({ msg: "You are not authorized to view this page" });
+        }
+    } catch {
+        return res.status(401).json({ msg: "Invalid Credentials" });
     }
     
 })
