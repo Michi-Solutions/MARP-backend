@@ -19,7 +19,6 @@ module.exports = {
         data_cadastro: new Date(),
         data_exclusao: null,
         perfil: 'admin',
-        turmas_area_conhecimento: JSON.stringify({ "id_turmas": [null] })
       },
       {
         nome: 'student',
@@ -30,7 +29,6 @@ module.exports = {
         data_cadastro: new Date(),
         data_exclusao: null,
         perfil: 'student',
-        turmas_area_conhecimento: JSON.stringify({ "id_turmas": [null] })
       },
       {
         nome: 'professor',
@@ -41,7 +39,6 @@ module.exports = {
         data_cadastro: new Date(),
         data_exclusao: null,
         perfil: 'professor',
-        turmas_area_conhecimento: JSON.stringify({ "id_turmas": [null] })
       },
     ], {}),
 
