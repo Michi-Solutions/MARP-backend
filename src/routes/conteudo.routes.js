@@ -10,29 +10,32 @@ const conteudoRoutes = express.Router();
 
 // list all areasConhecimento
 conteudoRoutes.get('/conteudo', async (req, res) => {
+    try {
+        const token = req.headers.authorization.split(" ")[1];
+        let decoded = jwt.verify(token, 'secret');
+        const conteudos = []
+        const _user = await User.findOne({ where: { id_usuario: decoded.id } });
 
-    const token = req.headers.authorization.split(" ")[1];
-    let decoded = jwt.verify(token, 'secret');
-    const conteudos = []
-    const _user = await User.findOne({ where: { id_usuario: decoded.id } });
+        if(_user.perfil == 'student'){
+            const _turma = await Turma.findAll({ where: { id_usuario: decoded.id } })
+            
+            for(let turma = 0; turma < _turma.length  ; turma++){
+                console.log(_turma[turma].dataValues.id_area_conhecimento);
+                const _conteudo = await Conteudo.findAll({ where: { id_area_conhecimento: _turma[turma].dataValues.id_area_conhecimento } })
+                conteudos.push(_conteudo)
+            }
+        }else if(_user.perfil == 'professor'){
+            const _areaConhecimento = await areaConhecimento.findAll({ where: { id_professor: decoded.id } })
+            for(let turma = 0; turma < _areaConhecimento.length  ; turma++){
+                const _conteudo = await Conteudo.findAll({ where: { id_area_conhecimento: _areaConhecimento[turma].dataValues.id_area_conhecimento } })
+                conteudos.push(_conteudo)
+            }
 
-    if(_user.perfil == 'student'){
-        const _turma = await Turma.findAll({ where: { id_usuario: decoded.id } })
-        
-        for(let turma = 0; turma < _turma.length  ; turma++){
-            console.log(_turma[turma].dataValues.id_area_conhecimento);
-            const _conteudo = await Conteudo.findAll({ where: { id_area_conhecimento: _turma[turma].dataValues.id_area_conhecimento } })
-            conteudos.push(_conteudo)
         }
-    }else if(_user.perfil == 'professor'){
-        const _areaConhecimento = await areaConhecimento.findAll({ where: { id_professor: decoded.id } })
-        for(let turma = 0; turma < _areaConhecimento.length  ; turma++){
-            const _conteudo = await Conteudo.findAll({ where: { id_area_conhecimento: _areaConhecimento[turma].dataValues.id_area_conhecimento } })
-            conteudos.push(_conteudo)
-        }
-
+        return res.json(conteudos);
+    } catch {
+        return res.status(401).json({ msg: "Invalid Credentials" });
     }
-    return res.json(conteudos);
 })
 
 conteudoRoutes.get('/conteudo/:id', async (req, res) => {
